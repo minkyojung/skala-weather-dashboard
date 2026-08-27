@@ -1,4 +1,6 @@
 <script setup>
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+
 defineProps({
     title: {
         type: String,
@@ -8,20 +10,12 @@ defineProps({
 </script>
 
 <template>
-    <div class="dashboard-card">
-        <h3>{{ title }}</h3>
-        <slot></slot>
-    </div>
+    <Card>
+        <CardHeader>
+            <CardTitle class="text-base">{{ title }}</CardTitle>
+        </CardHeader>
+        <CardContent>
+            <slot></slot>
+        </CardContent>
+    </Card>
 </template>
-
-<style scoped>
-.dashboard-card {
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 16px;
-    margin-bottom: 16px;
-}
-.dashboard-card h3 {
-    margin-top: 0;
-}
-</style>

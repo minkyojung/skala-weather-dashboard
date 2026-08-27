@@ -2,9 +2,10 @@
 import { ref, computed, watch, watchEffect, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
-import BaseDashboardCard from '../components/exercise/BaseDashboardCard.vue'
-import SearchBar from '../components/exercise/SearchBar.vue'
-import WeatherCard from '../components/exercise/WeatherCard.vue'
+import BaseDashboardCard from '@/components/exercise/BaseDashboardCard.vue'
+import SearchBar from '@/components/exercise/SearchBar.vue'
+import WeatherCard from '@/components/exercise/WeatherCard.vue'
+import { Skeleton } from '@/components/ui/skeleton'
 import { fetchAllWeather } from '../api/weatherApi.js'
 import { useTemperature } from '../composables/useTemperature.js'
 import { useFavoriteStore } from '../stores/favoriteStore.js'
@@ -71,49 +72,46 @@ const handleClickDetail = (city) => {
 </script>
 
 <template>
-    <div class="weather-home">
-        <h1>날씨 대시보드</h1>
+    <div class="max-w-2xl space-y-4">
+        <h1 class="text-2xl font-bold tracking-tight">날씨 대시보드</h1>
 
         <BaseDashboardCard title="도시 검색">
             <SearchBar :search-query="searchQuery" @update-query="handleUpdateQuery" />
         </BaseDashboardCard>
 
-        <p v-if="selectedCityInfo">{{ selectedCityInfo.name }}이 선택되었습니다.</p>
-        <p>평균 기온 : {{ displayAverageTemp }}{{ unitSymbol }}</p>
-        <p>⭐ 즐겨찾기: {{ favoriteCount }}개</p>
+        <div class="flex flex-wrap gap-x-4 gap-y-1 rounded-md bg-muted px-3 py-2 text-sm">
+            <span v-if="selectedCityInfo">{{ selectedCityInfo.name }} 선택됨</span>
+            <span>평균 기온 {{ displayAverageTemp }}{{ unitSymbol }}</span>
+            <span>⭐ 즐겨찾기 {{ favoriteCount }}개</span>
+        </div>
 
         <BaseDashboardCard title="지역별 날씨 현황">
-            <p v-if="isLoading">날씨 정보를 불러오는 중...</p>
-            <p v-else-if="errorMessage" class="error">{{ errorMessage }}</p>
-            <template v-else-if="searchQuery === ''">
-                <WeatherCard
-                    v-for="city in weatherList"
-                    :key="city.id"
-                    :city="city"
-                    @select-card="handleSelectCard"
-                    @click-detail="handleClickDetail"
-                />
-            </template>
-            <template v-else-if="filteredWeatherList.length > 0">
-                <WeatherCard
-                    v-for="city in filteredWeatherList"
-                    :key="city.id"
-                    :city="city"
-                    @select-card="handleSelectCard"
-                    @click-detail="handleClickDetail"
-                />
-            </template>
-            <p v-else>검색 결과가 일치하는 도시가 없습니다.</p>
+            <div v-if="isLoading" class="space-y-3">
+                <Skeleton v-for="n in 3" :key="n" class="h-24 w-full" />
+            </div>
+            <p v-else-if="errorMessage" class="text-sm text-destructive">{{ errorMessage }}</p>
+
+            <div v-else class="space-y-3">
+                <template v-if="searchQuery === ''">
+                    <WeatherCard
+                        v-for="city in weatherList"
+                        :key="city.id"
+                        :city="city"
+                        @select-card="handleSelectCard"
+                        @click-detail="handleClickDetail"
+                    />
+                </template>
+                <template v-else-if="filteredWeatherList.length > 0">
+                    <WeatherCard
+                        v-for="city in filteredWeatherList"
+                        :key="city.id"
+                        :city="city"
+                        @select-card="handleSelectCard"
+                        @click-detail="handleClickDetail"
+                    />
+                </template>
+                <p v-else class="text-sm text-muted-foreground">검색 결과가 일치하는 도시가 없습니다.</p>
+            </div>
         </BaseDashboardCard>
     </div>
 </template>
-
-<style scoped>
-.weather-home {
-    max-width: 500px;
-}
-
-.error {
-    color: #c0392b;
-}
-</style>
