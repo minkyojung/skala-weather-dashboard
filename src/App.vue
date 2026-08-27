@@ -7,7 +7,6 @@ const links = [
     { to: '/', label: '대시보드' },
     { to: '/world', label: '지금 지구는' },
     { to: '/advice', label: '오늘 뭐 입지?' },
-    { to: '/stack', label: 'Hands On' },
     { to: '/about', label: '소개' },
 ]
 </script>

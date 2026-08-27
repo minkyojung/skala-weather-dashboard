@@ -52,8 +52,6 @@
   - 탭 4개 — 더운 곳 / 추운 곳 / 오늘 최고 / 비슷한 곳
 - `/advice` 오늘 뭐 입지?
   - 날씨를 해석해 준비물(우산·겉옷)이 같은 도시끼리 묶어서 표시
-- `/stack` Hands On
-  - 수업 중 수행한 날씨 실습(1~3일차)과 Pinia 카운터
 - `/about` 소개
   - 사용한 기술과 구현 방식 요약
 - 온도 단위(℃ / ℉)는 헤더 버튼으로 전환하며, 모든 화면에 즉시 반영
@@ -83,7 +81,6 @@
 - 상태 관리 · Pinia
   - `configStore` — 온도 단위(`unit`), 기호(`unitSymbol`), 토글(`toggleUnit`)
   - `favoriteStore` — 즐겨찾기 목록, 개수, `isFavorite(id)`, `toggleFavorite(id)`
-  - `counter` — 실습용 카운터
   - `useTemperature` 컴포저블이 섭씨→화씨 변환을 전담
   - 5개 파일에 같은 변환식이 중복되어 한 곳으로 모음
 - 데이터 · 외부 API 2곳
@@ -126,36 +123,33 @@
   - Card, Button 같은 프리미티브는 날씨를 모름
   - `WeatherRow`, `RankingList` 같은 도메인 컴포넌트는 직접 조립
   - 기존 컴포넌트를 교체하지 않고 내부를 프리미티브로 채우는 방식으로 이관
-- 3일차 실습 산출물은 그대로 둔다
-  - `WeatherCard`, `BaseDashboardCard`, `SearchBar`는 `WeatherParent.vue`가 사용
-  - 새 대시보드는 `WeatherRow`를 사용하고, 실습 파일은 당시 형태를 유지
+- 프로덕션 빌드에서만 드러나는 문제가 있다
+  - 배포본이 빈 화면이었고 `axios`가 `undefined`라는 오류가 발생
+  - Rollup이 공용 코드를 가장 큰 lazy 청크에 넣으면서 청크 간 순환 참조가 생성
+  - 개발 서버는 모듈을 개별 제공해 청크 분할이 없으므로 재현되지 않음
+  - `node_modules`를 vendor 청크로 분리해 라이브러리가 앱 코드를 참조하지 않도록 수정
 
 ## 직접 작성·수정한 파일
 
 - 신규 작성
-  - `src/stores/` — `configStore.js`, `favoriteStore.js`, `counter.js`
+  - `src/stores/` — `configStore.js`, `favoriteStore.js`
   - `src/composables/useTemperature.js`
   - `src/api/` — `weatherApi.js`, `worldWeatherApi.js`
   - `src/constants/` — `cities.js`, `worldCities.js`
   - `src/components/exercise/` — `UnitToggler.vue`, `ForecastList.vue`, `RankingList.vue`, `StatCard.vue`, `WeatherRow.vue`
-  - `src/components/practices/library/StoreCounter.vue`
   - `src/views/WorldWeatherView.vue`
 - 수정
   - `src/main.js` — Pinia 등록
   - `src/App.vue` — 앱 셸(헤더·네비게이션) 재구성
   - `src/router/index.js` — `/world` 경로 추가
-  - `src/views/` — `WeatherHomeView`, `WeatherDetailView`, `WeatherAdviceView`, `WeatherAboutView`, `PracticeStackView`, `NotFoundView`
-  - `src/components/exercise/` — `WeatherCard.vue`, `AdviceBadge.vue`
+  - `src/views/` — `WeatherHomeView`, `WeatherDetailView`, `WeatherAdviceView`, `WeatherAboutView`, `NotFoundView`
+  - `src/components/exercise/AdviceBadge.vue`
   - `src/utils/weatherAdvice.js` — 아이콘 매핑용 `type` 키 추가
   - `src/assets/main.css`, `vite.config.js`, `.gitignore`
 - 직접 작성하지 않음
   - `src/components/ui/` — shadcn-vue CLI가 생성 (36개 파일)
   - `src/lib/utils.js` — shadcn-vue CLI가 생성
   - `components.json` — shadcn-vue 설정 파일
-- 이전 수업 실습 파일
-  - `src/weather.vue`, `src/weather-2.vue`, `src/WeatherParent.vue` — 1~3일차 날씨 실습
-  - `src/components/exercise/BaseDashboardCard.vue`, `SearchBar.vue` — 3일차 실습에서 사용
-  - 위 파일들은 당시 형태를 유지하기 위해 최소한만 수정
 
 ## AI 사용
 
@@ -172,5 +166,6 @@
   - 생성된 UI가 정보 위계 없이 나열만 한다고 판단해 레이아웃 재설계를 요구
   - 시간 표기를 24시간제에서 AM/PM으로 수정
   - dev 서버 실행 오류를 발견해 원인을 확인하고 포트 설정을 분리
-  - 코드 챌린지와 Hands On을 구분해 제출 범위를 결정
+  - 제출 범위를 직접 구분해 실습용 코드를 정리
+  - 배포본 오류를 발견해 원인 확인 후 수정
   - README 구조와 문체를 직접 재작성

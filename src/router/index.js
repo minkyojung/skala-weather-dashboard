@@ -29,11 +29,6 @@ const router = createRouter({
       component: () => import('../views/WorldWeatherView.vue'),
     },
     {
-      path: '/stack',
-      name: 'stack',
-      component: () => import('../views/PracticeStackView.vue'),
-    },
-    {
       path: '/:pathMatch(.*)*',
       name: 'not-found',
       component: () => import('../views/NotFoundView.vue'),
