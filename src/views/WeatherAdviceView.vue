@@ -1,10 +1,11 @@
 <script setup>
-import { ref, onMounted } from 'vue'
-import { fetchAllWeather } from '@/api/weatherApi.js'
-import AdviceBadge from '@/components/exercise/AdviceBadge.vue'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { ref, computed, onMounted } from 'vue'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
+import { fetchAllWeather } from '@/api/weatherApi.js'
 import { useTemperature } from '@/composables/useTemperature.js'
+import { getWeatherAdvice } from '@/utils/weatherAdvice.js'
 
 const cities = ref([])
 const isLoading = ref(false)
@@ -24,45 +25,59 @@ onMounted(async () => {
         isLoading.value = false
     }
 })
+
+// 도시를 나열하는 대신 같은 추천끼리 묶는다.
+// '오늘 뭐 입지?'에 대한 답은 도시 목록이 아니라 추천 자체다.
+const adviceGroups = computed(() => {
+    const groups = new Map()
+    for (const city of cities.value) {
+        const advice = getWeatherAdvice(city)
+        if (!groups.has(advice.message)) {
+            groups.set(advice.message, { ...advice, cities: [] })
+        }
+        groups.get(advice.message).cities.push(city)
+    }
+    return [...groups.values()].sort((a, b) => b.cities.length - a.cities.length)
+})
 </script>
 
 <template>
     <div class="space-y-6">
         <header>
             <h1 class="text-2xl font-bold tracking-tight">오늘 뭐 입지?</h1>
-            <p class="mt-1 text-sm text-muted-foreground">도시별 날씨를 바로 해석해서 알려드려요.</p>
+            <p class="mt-1 text-sm text-muted-foreground">
+                지금 날씨를 해석해 필요한 준비물끼리 묶었습니다.
+            </p>
         </header>
 
-        <Card>
-            <CardHeader>
-                <CardTitle class="text-base">지역별 추천</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <div v-if="isLoading" class="space-y-2">
-                    <Skeleton v-for="n in 5" :key="n" class="h-10 w-full" />
-                </div>
-                <p v-else-if="errorMessage" class="text-sm text-destructive">{{ errorMessage }}</p>
+        <div v-if="isLoading" class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <Skeleton v-for="n in 3" :key="n" class="h-44 w-full" />
+        </div>
+        <p v-else-if="errorMessage" class="text-sm text-destructive">{{ errorMessage }}</p>
 
-                <div v-else class="space-y-1">
+        <div v-else class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <Card v-for="group in adviceGroups" :key="group.message">
+                <CardHeader>
+                    <CardTitle class="flex items-center gap-2 text-base">
+                        <span class="text-2xl">{{ group.icon }}</span>
+                        {{ group.message }}
+                    </CardTitle>
+                    <CardDescription>{{ group.cities.length }}개 도시</CardDescription>
+                </CardHeader>
+                <CardContent class="space-y-1">
                     <div
-                        v-for="city in cities"
+                        v-for="city in group.cities"
                         :key="city.id"
-                        class="flex flex-wrap items-center gap-2 border-b py-2 last:border-0"
+                        class="flex items-center gap-2 border-b py-2 text-sm last:border-0"
                     >
                         <span class="font-medium">{{ city.name }}</span>
-                        <span class="text-sm text-muted-foreground">
-                            {{ toDisplay(city.temp) }}{{ unitSymbol }} · {{ city.status }}
-                        </span>
-                        <span class="ml-auto">
-                            <AdviceBadge :city="city" />
+                        <Badge variant="outline" class="font-normal">{{ city.status }}</Badge>
+                        <span class="ml-auto tabular-nums">
+                            {{ toDisplay(city.temp) }}{{ unitSymbol }}
                         </span>
                     </div>
-                </div>
-            </CardContent>
-        </Card>
-
-        <RouterLink to="/" class="inline-block text-sm underline underline-offset-4">
-            ← 메인 대시보드로 돌아가기
-        </RouterLink>
+                </CardContent>
+            </Card>
+        </div>
     </div>
 </template>
