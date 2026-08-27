@@ -6,13 +6,20 @@
 - 사용 기술
   - Vue 3 · Pinia · Axios · Tailwind CSS · shadcn-vue
 
-## 실행 방법
+## 링크
+
+- 배포 — https://skala-weather-dashboard.vercel.app
+- 저장소 — https://github.com/minkyojung/skala-weather-dashboard
+- 배포본은 별도 설정 없이 바로 확인할 수 있습니다.
+
+## 로컬에서 실행하려면
 
 - 사전 조건
   - 외부 API를 2개 사용
     - OpenWeatherMap — **API 키 필요.** 국내 날씨, 5일 예보, 옷차림 추천
     - Open-Meteo — 키 불필요. 세계 40개 도시 비교(`/world`)
   - 키를 등록하지 않으면 `/world`만 동작하고 나머지 화면은 오류 메시지가 표시
+  - 저장소에는 키가 포함되지 않으므로, 소스로 직접 실행하려면 본인 키가 필요합니다.
 - 1단계 · 키 발급
   - [openweathermap.org/api](https://openweathermap.org/api)에서 발급
   - 활성화까지 최대 2시간이 걸립니다. 그 전에는 `401`이 뜹니다.
@@ -25,11 +32,11 @@
   - `npm run dev`
   - [http://localhost:5180](http://localhost:5180) 접속
   - `.env.local`을 수정했다면 dev 서버를 재시작해야 반영됩니다.
-- 배포 · Vercel
+- 배포 설정 (Vercel)
   - Settings → Environment Variables에 `VITE_OWM_API_KEY` 등록
-  - `.env.local`은 저장소에 올라가지 않으므로, 등록하지 않으면 배포본에서도 `/world`만 동작합니다.
+  - 등록하지 않으면 배포본에서도 `/world`만 동작합니다.
   - 변수를 추가·변경한 뒤에는 재배포해야 반영됩니다.
-
+  - `vercel.json`에 SPA rewrite 설정 — 없으면 `/world` 직접 접속 시 404
 
 ## 화면
 
@@ -51,7 +58,19 @@
   - 사용한 기술과 구현 방식 요약
 - 온도 단위(℃ / ℉)는 헤더 버튼으로 전환하며, 모든 화면에 즉시 반영
 
-<!-- 스크린샷: 대시보드 / 지금 지구는 -->
+### 화면 미리보기
+
+**대시보드** — 국내 7개 도시, 즐겨찾기, 선택 도시 상세
+
+![대시보드](docs/dashboard.png)
+
+**상세** — 현재 날씨와 5일 예보
+
+![상세](docs/detail.png)
+
+**지금 지구는** — 세계 40개 도시 순위
+
+![지금 지구는](docs/world.png)
 
 ## 구현 내용
 
@@ -137,3 +156,21 @@
   - `src/weather.vue`, `src/weather-2.vue`, `src/WeatherParent.vue` — 1~3일차 날씨 실습
   - `src/components/exercise/BaseDashboardCard.vue`, `SearchBar.vue` — 3일차 실습에서 사용
   - 위 파일들은 당시 형태를 유지하기 위해 최소한만 수정
+
+## AI 사용
+
+- 사용 도구
+  - Claude Code
+- 사용 범위
+  - Pinia 스토어, API 호출 모듈, 컴포저블, 컴포넌트 작성
+  - 외부 API 후보 조사 및 응답 형식 검증
+  - Tailwind CSS·shadcn-vue 도입과 기존 화면 이관
+  - README 초안 작성
+- 직접 확인하고 수정한 내용
+  - 외부 API 주제를 직접 탐색하고, 구현 난이도를 따져 과제 범위에 맞게 조정
+  - 추가 Store를 즐겨찾기로 선택 — 인자를 받는 getter를 다뤄보기 위해
+  - 생성된 UI가 정보 위계 없이 나열만 한다고 판단해 레이아웃 재설계를 요구
+  - 시간 표기를 24시간제에서 AM/PM으로 수정
+  - dev 서버 실행 오류를 발견해 원인을 확인하고 포트 설정을 분리
+  - 코드 챌린지와 Hands On을 구분해 제출 범위를 결정
+  - README 구조와 문체를 직접 재작성
