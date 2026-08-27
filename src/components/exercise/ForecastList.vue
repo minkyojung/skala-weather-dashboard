@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from 'vue'
-import { useTemperature } from '../../composables/useTemperature.js'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { useTemperature } from '@/composables/useTemperature.js'
 
 const props = defineProps({
     days: {
@@ -21,35 +22,32 @@ const displayDays = computed(() =>
 </script>
 
 <template>
-    <ul class="forecast-list">
-        <li v-for="day in displayDays" :key="day.date">
-            <span class="date">{{ day.date.slice(5).replace('-', '/') }}</span>
-            <img :src="`https://openweathermap.org/img/wn/${day.icon}.png`" :alt="day.status" width="32" height="32" />
-            <span>{{ day.status }}</span>
-            <span class="temp">{{ day.minTemp }} / {{ day.maxTemp }}{{ unitSymbol }}</span>
-        </li>
-    </ul>
+    <Table>
+        <TableHeader>
+            <TableRow>
+                <TableHead class="w-16">날짜</TableHead>
+                <TableHead>날씨</TableHead>
+                <TableHead class="text-right">최저 / 최고</TableHead>
+            </TableRow>
+        </TableHeader>
+        <TableBody>
+            <TableRow v-for="day in displayDays" :key="day.date">
+                <TableCell class="tabular-nums">{{ day.date.slice(5).replace('-', '/') }}</TableCell>
+                <TableCell>
+                    <span class="flex items-center gap-2">
+                        <img
+                            :src="`https://openweathermap.org/img/wn/${day.icon}.png`"
+                            :alt="day.status"
+                            width="32"
+                            height="32"
+                        />
+                        {{ day.status }}
+                    </span>
+                </TableCell>
+                <TableCell class="text-right tabular-nums">
+                    {{ day.minTemp }} / {{ day.maxTemp }}{{ unitSymbol }}
+                </TableCell>
+            </TableRow>
+        </TableBody>
+    </Table>
 </template>
-
-<style scoped>
-.forecast-list {
-    list-style: none;
-    padding: 0;
-}
-
-.forecast-list li {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 6px 0;
-    border-bottom: 1px solid #eee;
-}
-
-.date {
-    width: 48px;
-}
-
-.temp {
-    margin-left: auto;
-}
-</style>

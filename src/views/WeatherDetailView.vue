@@ -1,9 +1,11 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { fetchWeatherByCityId, fetchForecastByCityId } from '../api/weatherApi.js'
-import { useTemperature } from '../composables/useTemperature.js'
-import ForecastList from '../components/exercise/ForecastList.vue'
+import { fetchWeatherByCityId, fetchForecastByCityId } from '@/api/weatherApi.js'
+import { useTemperature } from '@/composables/useTemperature.js'
+import ForecastList from '@/components/exercise/ForecastList.vue'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 
 const route = useRoute()
 const cityInfo = ref(null)
@@ -36,33 +38,52 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div class="weather-detail">
-        <h1>지역 상세 기상 관측 정보</h1>
+    <div class="max-w-2xl space-y-4">
+        <h1 class="text-2xl font-bold tracking-tight">지역 상세 기상 관측 정보</h1>
 
-        <p v-if="isLoading">날씨 정보를 불러오는 중...</p>
-        <p v-else-if="errorMessage" class="error">{{ errorMessage }}</p>
-        <div v-else-if="cityInfo">
-            <p>지역: 대한민국 {{ cityInfo.name }}</p>
-            <p>날씨: {{ cityInfo.description }}</p>
-            <p>현재 기온: {{ displayTemp }}{{ unitSymbol }}</p>
-            <p>습도: {{ cityInfo.humidity }}%</p>
-            <p>풍속: {{ cityInfo.windSpeed }}m/s</p>
-
-            <h2>5일 예보</h2>
-            <ForecastList :days="forecast" />
+        <div v-if="isLoading" class="space-y-3">
+            <Skeleton class="h-40 w-full" />
+            <Skeleton class="h-56 w-full" />
         </div>
-        <p v-else>해당 도시 정보를 찾을 수 없습니다.</p>
+        <p v-else-if="errorMessage" class="text-sm text-destructive">{{ errorMessage }}</p>
 
-        <RouterLink to="/">← 메인 대시보드로 돌아가기</RouterLink>
+        <template v-else-if="cityInfo">
+            <Card>
+                <CardHeader>
+                    <CardTitle class="text-base">대한민국 {{ cityInfo.name }}</CardTitle>
+                </CardHeader>
+                <CardContent class="space-y-3">
+                    <div class="flex items-baseline gap-2">
+                        <span class="text-4xl font-bold tabular-nums">{{ displayTemp }}{{ unitSymbol }}</span>
+                        <span class="text-muted-foreground">{{ cityInfo.description }}</span>
+                    </div>
+                    <dl class="grid grid-cols-2 gap-2 text-sm">
+                        <div class="flex justify-between rounded-md bg-muted px-3 py-2">
+                            <dt class="text-muted-foreground">습도</dt>
+                            <dd class="tabular-nums">{{ cityInfo.humidity }}%</dd>
+                        </div>
+                        <div class="flex justify-between rounded-md bg-muted px-3 py-2">
+                            <dt class="text-muted-foreground">풍속</dt>
+                            <dd class="tabular-nums">{{ cityInfo.windSpeed }}m/s</dd>
+                        </div>
+                    </dl>
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle class="text-base">5일 예보</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <ForecastList :days="forecast" />
+                </CardContent>
+            </Card>
+        </template>
+
+        <p v-else class="text-sm text-muted-foreground">해당 도시 정보를 찾을 수 없습니다.</p>
+
+        <RouterLink to="/" class="inline-block text-sm underline underline-offset-4">
+            ← 메인 대시보드로 돌아가기
+        </RouterLink>
     </div>
 </template>
-
-<style scoped>
-.weather-detail {
-    max-width: 500px;
-}
-
-.error {
-    color: #c0392b;
-}
-</style>
