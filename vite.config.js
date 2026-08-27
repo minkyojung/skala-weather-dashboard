@@ -12,6 +12,18 @@ export default defineConfig({
     vueDevTools(),
     tailwindcss(),
   ],
+  build: {
+    rollupOptions: {
+      output: {
+        // node_modules 코드를 별도 청크로 분리한다.
+        // 그러지 않으면 Rollup이 공용 코드를 큰 lazy 청크 안에 넣어
+        // 라이브러리 청크가 화면 청크를 역참조하는 순환이 생긴다.
+        manualChunks(id) {
+          if (id.includes('node_modules')) return 'vendor'
+        },
+      },
+    },
+  },
   server: {
     port: 5180,
     strictPort: true,
