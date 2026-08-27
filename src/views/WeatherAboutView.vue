@@ -29,7 +29,7 @@ const sections = [
 </script>
 
 <template>
-    <div class="max-w-2xl space-y-4">
+    <div class="max-w-3xl space-y-4">
         <header>
             <h1 class="text-2xl font-bold tracking-tight">서비스 소개</h1>
             <p class="mt-1 text-sm text-muted-foreground">Vue 3 학습 목적으로 만든 날씨 앱입니다.</p>

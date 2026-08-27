@@ -60,7 +60,7 @@ const dayNightSummary = computed(() => {
 </script>
 
 <template>
-    <div class="max-w-2xl space-y-4">
+    <div class="space-y-6">
         <header>
             <h1 class="text-2xl font-bold tracking-tight">지금 지구는</h1>
             <p class="mt-1 text-sm text-muted-foreground">

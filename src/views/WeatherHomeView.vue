@@ -72,7 +72,7 @@ const handleClickDetail = (city) => {
 </script>
 
 <template>
-    <div class="max-w-2xl space-y-4">
+    <div class="space-y-6">
         <h1 class="text-2xl font-bold tracking-tight">날씨 대시보드</h1>
 
         <BaseDashboardCard title="도시 검색">

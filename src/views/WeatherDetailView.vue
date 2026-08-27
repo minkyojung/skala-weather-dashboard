@@ -38,7 +38,7 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div class="max-w-2xl space-y-4">
+    <div class="space-y-6">
         <h1 class="text-2xl font-bold tracking-tight">지역 상세 기상 관측 정보</h1>
 
         <div v-if="isLoading" class="space-y-3">
