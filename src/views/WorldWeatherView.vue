@@ -6,7 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent } from '@/components/ui/card'
-import { Sun, Moon } from '@lucide/vue'
+import { Sun, Moon, Flame, Snowflake, Thermometer, Users } from '@lucide/vue'
 
 const cities = ref([])
 const isLoading = ref(false)
@@ -111,10 +111,10 @@ const dayNightSummary = computed(() => {
 
             <Tabs default-value="hottest" class="space-y-4">
                 <TabsList>
-                    <TabsTrigger value="hottest">🔥 더운 곳</TabsTrigger>
-                    <TabsTrigger value="coldest">🥶 추운 곳</TabsTrigger>
-                    <TabsTrigger value="today">☀️ 오늘 최고</TabsTrigger>
-                    <TabsTrigger value="twins">👯 쌍둥이</TabsTrigger>
+                    <TabsTrigger value="hottest"><Flame class="size-3.5" />더운 곳</TabsTrigger>
+                    <TabsTrigger value="coldest"><Snowflake class="size-3.5" />추운 곳</TabsTrigger>
+                    <TabsTrigger value="today"><Thermometer class="size-3.5" />오늘 최고</TabsTrigger>
+                    <TabsTrigger value="twins"><Users class="size-3.5" />비슷한 곳</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="hottest">

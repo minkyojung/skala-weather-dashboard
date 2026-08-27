@@ -2,11 +2,11 @@
 import { ref, computed, watch, watchEffect, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
-import { Search, Thermometer, Flame, Snowflake, Star } from '@lucide/vue'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Search, Thermometer, Flame, Snowflake, Star, Droplets, Wind, ArrowRight } from '@lucide/vue'
+import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Separator } from '@/components/ui/separator'
+import { Button } from '@/components/ui/button'
 import StatCard from '@/components/exercise/StatCard.vue'
 import WeatherRow from '@/components/exercise/WeatherRow.vue'
 import AdviceBadge from '@/components/exercise/AdviceBadge.vue'
@@ -40,6 +40,11 @@ onMounted(async () => {
         isLoading.value = false
     }
 })
+
+// 다수와 다른 추천을 가진 도시만 목록에서 뱃지를 단다.
+const majorityAdvice = computed(() => adviceGroups.value[0]?.message ?? '')
+
+const previewCity = computed(() => selectedCityInfo.value ?? weatherList.value[0] ?? null)
 
 const filteredWeatherList = computed(() =>
     weatherList.value.filter(city => city.name.includes(searchQuery.value)),
@@ -89,42 +94,28 @@ const handleClickDetail = (city) => {
 
 <template>
     <div class="space-y-6">
-        <header class="flex flex-wrap items-end justify-between gap-3">
-            <div>
-                <h1 class="text-2xl font-bold tracking-tight">날씨 대시보드</h1>
-                <p class="mt-1 text-sm text-muted-foreground">
-                    전국 {{ weatherList.length || 7 }}개 도시의 실시간 기상 정보
-                </p>
-            </div>
-            <div class="relative w-full sm:w-64">
-                <Search class="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                <Input v-model="searchQuery" class="pl-9" placeholder="도시 이름 검색" />
-            </div>
+        <header>
+            <h1 class="text-2xl font-bold tracking-tight">날씨 대시보드</h1>
+            <p class="mt-1 text-sm text-muted-foreground">
+                전국 {{ weatherList.length || 7 }}개 도시의 실시간 기상 정보
+            </p>
         </header>
 
-        <div v-if="isLoading" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <Skeleton v-for="n in 4" :key="n" class="h-24 w-full" />
+        <div v-if="isLoading" class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <Skeleton v-for="n in 4" :key="n" class="h-16 w-full" />
         </div>
-        <div v-else-if="weatherList.length" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <StatCard label="평균 기온" :value="`${toDisplay(averageTemp, 1)}${unitSymbol}`">
-                <template #icon><Thermometer class="size-3.5" /></template>
-            </StatCard>
-            <StatCard
-                label="가장 더운 곳"
-                :value="`${toDisplay(hottestCity.temp)}${unitSymbol}`"
-                :hint="hottestCity.name"
-            >
+        <div v-else-if="weatherList.length" class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <StatCard label="가장 더운 곳" :value="hottestCity.name" :unit="`${toDisplay(hottestCity.temp)}${unitSymbol}`">
                 <template #icon><Flame class="size-3.5" /></template>
             </StatCard>
-            <StatCard
-                label="가장 추운 곳"
-                :value="`${toDisplay(coldestCity.temp)}${unitSymbol}`"
-                :hint="coldestCity.name"
-            >
+            <StatCard label="가장 추운 곳" :value="coldestCity.name" :unit="`${toDisplay(coldestCity.temp)}${unitSymbol}`">
                 <template #icon><Snowflake class="size-3.5" /></template>
             </StatCard>
-            <StatCard label="즐겨찾기" :value="`${favoriteCount}개`">
+            <StatCard label="즐겨찾기" :value="favoriteCount" unit="개">
                 <template #icon><Star class="size-3.5" /></template>
+            </StatCard>
+            <StatCard label="평균 기온" :value="`${toDisplay(averageTemp, 1)}${unitSymbol}`">
+                <template #icon><Thermometer class="size-3.5" /></template>
             </StatCard>
         </div>
 
@@ -132,18 +123,32 @@ const handleClickDetail = (city) => {
             <Card class="lg:col-span-2">
                 <CardHeader>
                     <CardTitle class="text-base">지역별 날씨 현황</CardTitle>
+                    <CardDescription v-if="adviceGroups.length === 1">
+                        오늘은 {{ weatherList.length }}곳 모두 {{ majorityAdvice }}
+                    </CardDescription>
+                    <CardDescription v-else-if="adviceGroups.length">
+                        {{ adviceGroups.map(g => `${g.message.replace(/하세요|해요|예요/, '')} ${g.cities.length}곳`).join(' · ') }}
+                    </CardDescription>
+                    <CardAction>
+                        <div class="relative w-44">
+                            <Search class="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+                            <Input v-model="searchQuery" class="h-8 pl-8 text-sm" placeholder="도시 검색" />
+                        </div>
+                    </CardAction>
                 </CardHeader>
                 <CardContent>
-                    <div v-if="isLoading" class="space-y-2">
-                        <Skeleton v-for="n in 5" :key="n" class="h-14 w-full" />
+                    <div v-if="isLoading" class="space-y-1">
+                        <Skeleton v-for="n in 7" :key="n" class="h-10 w-full" />
                     </div>
                     <p v-else-if="errorMessage" class="text-sm text-destructive">{{ errorMessage }}</p>
 
-                    <div v-else-if="filteredWeatherList.length" class="divide-y">
+                    <div v-else-if="filteredWeatherList.length" class="-mx-2">
                         <WeatherRow
                             v-for="city in filteredWeatherList"
                             :key="city.id"
                             :city="city"
+                            :selected="previewCity?.id === city.id"
+                            :show-advice="adviceGroups.length > 1 && getWeatherAdvice(city).message !== majorityAdvice"
                             @select-card="selectedCityInfo = city"
                             @click-detail="handleClickDetail"
                         />
@@ -154,27 +159,38 @@ const handleClickDetail = (city) => {
                 </CardContent>
             </Card>
 
-            <Card>
+            <Card v-if="previewCity" class="lg:sticky lg:top-20 lg:self-start">
                 <CardHeader>
-                    <CardTitle class="text-base">오늘의 추천</CardTitle>
+                    <CardDescription>선택한 도시</CardDescription>
+                    <CardTitle class="text-xl">{{ previewCity.name }}</CardTitle>
                 </CardHeader>
                 <CardContent class="space-y-4">
-                    <div v-if="isLoading" class="space-y-2">
-                        <Skeleton v-for="n in 3" :key="n" class="h-12 w-full" />
-                    </div>
-                    <template v-else>
-                        <div v-for="group in adviceGroups" :key="group.message" class="space-y-1.5">
-                            <div class="flex items-center gap-2">
-                                <AdviceBadge :city="group.cities[0]" />
-                                <span class="text-xs text-muted-foreground">{{ group.cities.length }}곳</span>
-                            </div>
-                            <p class="text-sm">{{ group.cities.map(city => city.name).join(' · ') }}</p>
-                            <Separator />
-                        </div>
-                        <p v-if="selectedCityInfo" class="text-xs text-muted-foreground">
-                            선택한 도시: {{ selectedCityInfo.name }}
+                    <div>
+                        <p class="text-4xl font-bold tabular-nums">
+                            {{ toDisplay(previewCity.temp) }}{{ unitSymbol }}
                         </p>
-                    </template>
+                        <p class="mt-1 text-sm text-muted-foreground">{{ previewCity.description }}</p>
+                    </div>
+
+                    <AdviceBadge :city="previewCity" />
+
+                    <dl class="space-y-1.5 text-sm">
+                        <div class="flex items-center gap-2">
+                            <Droplets class="size-4 shrink-0 text-muted-foreground" />
+                            <dt class="text-muted-foreground">습도</dt>
+                            <dd class="ml-auto tabular-nums">{{ previewCity.humidity }}%</dd>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <Wind class="size-4 shrink-0 text-muted-foreground" />
+                            <dt class="text-muted-foreground">풍속</dt>
+                            <dd class="ml-auto tabular-nums">{{ previewCity.windSpeed }}m/s</dd>
+                        </div>
+                    </dl>
+
+                    <Button variant="outline" size="sm" class="w-full" @click="handleClickDetail(previewCity)">
+                        상세보기
+                        <ArrowRight class="size-4" />
+                    </Button>
                 </CardContent>
             </Card>
         </div>

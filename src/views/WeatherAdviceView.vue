@@ -2,6 +2,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Umbrella, Shirt, Sun } from '@lucide/vue'
 import { Skeleton } from '@/components/ui/skeleton'
 import { fetchAllWeather } from '@/api/weatherApi.js'
 import { useTemperature } from '@/composables/useTemperature.js'
@@ -28,6 +29,8 @@ onMounted(async () => {
 
 // 도시를 나열하는 대신 같은 추천끼리 묶는다.
 // '오늘 뭐 입지?'에 대한 답은 도시 목록이 아니라 추천 자체다.
+const ICONS = { umbrella: Umbrella, jacket: Shirt, good: Sun }
+
 const adviceGroups = computed(() => {
     const groups = new Map()
     for (const city of cities.value) {
@@ -37,7 +40,9 @@ const adviceGroups = computed(() => {
         }
         groups.get(advice.message).cities.push(city)
     }
-    return [...groups.values()].sort((a, b) => b.cities.length - a.cities.length)
+    return [...groups.values()]
+        .map(group => ({ ...group, iconComponent: ICONS[group.type] ?? Sun }))
+        .sort((a, b) => b.cities.length - a.cities.length)
 })
 </script>
 
@@ -59,7 +64,7 @@ const adviceGroups = computed(() => {
             <Card v-for="group in adviceGroups" :key="group.message">
                 <CardHeader>
                     <CardTitle class="flex items-center gap-2 text-base">
-                        <span class="text-2xl">{{ group.icon }}</span>
+                        <component :is="group.iconComponent" class="size-5 text-muted-foreground" />
                         {{ group.message }}
                     </CardTitle>
                     <CardDescription>{{ group.cities.length }}개 도시</CardDescription>

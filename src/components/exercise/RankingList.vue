@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Sun, Moon } from '@lucide/vue'
 import { useTemperature } from '@/composables/useTemperature.js'
 
 const props = defineProps({
@@ -38,8 +39,9 @@ const rows = computed(() =>
                 <span class="w-5 text-sm text-muted-foreground tabular-nums">{{ index + 1 }}</span>
                 <span class="font-medium">{{ city.name }}</span>
 
-                <Badge v-if="showNow" variant="secondary" class="font-normal">
-                    {{ city.status }} · {{ city.localTime }} {{ city.isDay ? '☀️' : '🌙' }}
+                <Badge v-if="showNow" variant="secondary" class="gap-1.5 font-normal">
+                    <component :is="city.isDay ? Sun : Moon" class="size-3.5" />
+                    {{ city.status }} · {{ city.localTime }}
                 </Badge>
                 <Badge v-else variant="outline" class="font-normal">{{ city.country }}</Badge>
 

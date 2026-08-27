@@ -3,16 +3,16 @@ import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import { Star, ChevronRight } from '@lucide/vue'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import AdviceBadge from './AdviceBadge.vue'
 import { useTemperature } from '@/composables/useTemperature.js'
 import { useFavoriteStore } from '@/stores/favoriteStore.js'
 
 const props = defineProps({
-    city: {
-        type: Object,
-        required: true,
-    },
+    city: { type: Object, required: true },
+    selected: { type: Boolean, default: false },
+    // 다수와 다른 추천일 때만 뱃지를 보여준다.
+    // 모든 행이 같은 뱃지를 달면 정보가 아니라 잡음이 된다.
+    showAdvice: { type: Boolean, default: false },
 })
 
 const emit = defineEmits(['select-card', 'click-detail'])
@@ -23,49 +23,37 @@ const favoriteStore = useFavoriteStore()
 const { isFavorite } = storeToRefs(favoriteStore)
 const { toggleFavorite } = favoriteStore
 
-// 더움/선선함 판단은 항상 섭씨 원본으로 한다.
-const isHot = computed(() => props.city.temp >= 25)
+const starred = computed(() => isFavorite.value(props.city.id))
 </script>
 
 <template>
     <div
-        class="flex cursor-pointer items-center gap-3 px-2 py-3 transition-colors hover:bg-accent/50"
+        class="group flex cursor-pointer items-center gap-3 rounded-md px-2 py-2 text-sm transition-colors hover:bg-accent"
+        :class="selected && 'bg-accent'"
         @click="emit('select-card', city)"
     >
         <Button
             variant="ghost"
             size="icon"
-            class="shrink-0"
-            :aria-label="isFavorite(city.id) ? '즐겨찾기 해제' : '즐겨찾기 추가'"
+            class="size-7 shrink-0 transition-opacity"
+            :class="!starred && 'opacity-0 group-hover:opacity-100 focus-visible:opacity-100'"
+            :aria-label="starred ? '즐겨찾기 해제' : '즐겨찾기 추가'"
             @click.stop="toggleFavorite(city.id)"
         >
-            <Star
-                class="size-4"
-                :class="isFavorite(city.id) ? 'fill-amber-400 text-amber-400' : 'text-muted-foreground'"
-            />
+            <Star class="size-4" :class="starred ? 'fill-amber-400 text-amber-400' : 'text-muted-foreground'" />
         </Button>
 
-        <div class="min-w-0">
-            <p class="font-medium">{{ city.name }}</p>
-            <p class="text-xs text-muted-foreground">{{ city.description ?? city.status }}</p>
-        </div>
+        <span class="w-14 shrink-0 font-medium">{{ city.name }}</span>
+        <span class="truncate text-muted-foreground">{{ city.description ?? city.status }}</span>
 
-        <div class="ml-auto flex items-center gap-3">
-            <AdviceBadge :city="city" class="hidden sm:inline-flex" />
-            <Badge :variant="isHot ? 'destructive' : 'secondary'" class="hidden font-normal md:inline-flex">
-                {{ isHot ? '더움' : '선선함' }}
-            </Badge>
-            <span class="w-16 text-right text-lg font-semibold tabular-nums">
-                {{ toDisplay(city.temp) }}{{ unitSymbol }}
-            </span>
-            <Button
-                variant="ghost"
-                size="icon"
-                aria-label="상세보기"
-                @click.stop="emit('click-detail', city)"
-            >
-                <ChevronRight class="size-4" />
-            </Button>
-        </div>
+        <AdviceBadge v-if="showAdvice" :city="city" class="ml-2 hidden shrink-0 sm:inline-flex" />
+
+        <span class="ml-auto w-14 shrink-0 text-right font-semibold tabular-nums">
+            {{ toDisplay(city.temp) }}{{ unitSymbol }}
+        </span>
+        <ChevronRight
+            class="size-4 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100"
+            @click.stop="emit('click-detail', city)"
+        />
     </div>
 </template>
