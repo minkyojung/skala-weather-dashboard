@@ -1,7 +1,6 @@
 <script setup>
 import { computed } from 'vue'
-import { storeToRefs } from 'pinia'
-import { useConfigStore } from '../../stores/configStore.js'
+import { useTemperature } from '../../composables/useTemperature.js'
 
 const props = defineProps({
     days: {
@@ -10,21 +9,13 @@ const props = defineProps({
     },
 })
 
-const configStore = useConfigStore()
-const { unitSymbol } = storeToRefs(configStore)
-
-function toDisplayTemp(rawTemp) {
-    if (configStore.unit === 'fahrenheit') {
-        return Math.round((rawTemp * 9) / 5 + 32)
-    }
-    return rawTemp
-}
+const { unitSymbol, toDisplay } = useTemperature()
 
 const displayDays = computed(() =>
     props.days.map(day => ({
         ...day,
-        minTemp: toDisplayTemp(day.minTemp),
-        maxTemp: toDisplayTemp(day.maxTemp),
+        minTemp: toDisplay(day.minTemp),
+        maxTemp: toDisplay(day.maxTemp),
     })),
 )
 </script>

@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import AdviceBadge from './AdviceBadge.vue'
-import { useConfigStore } from '../../stores/configStore.js'
+import { useTemperature } from '../../composables/useTemperature.js'
 import { useFavoriteStore } from '../../stores/favoriteStore.js'
 
 const props = defineProps({
@@ -14,21 +14,14 @@ const props = defineProps({
 
 const emit = defineEmits(['select-card', 'click-detail'])
 
-const configStore = useConfigStore()
-const { unitSymbol } = storeToRefs(configStore)
+const { unitSymbol, toDisplay } = useTemperature()
 
 const favoriteStore = useFavoriteStore()
 const { isFavorite } = storeToRefs(favoriteStore)
 const { toggleFavorite } = favoriteStore
 
-// 표시용 온도만 변환한다. 더움/선선함 판단은 아래에서 원본 city.temp를 그대로 쓴다.
-const displayTemp = computed(() => {
-    const rawTemp = props.city.temp
-    if (configStore.unit === 'fahrenheit') {
-        return Math.round((rawTemp * 9) / 5 + 32)
-    }
-    return rawTemp
-})
+// 더움/선선함 판단은 템플릿에서 원본 city.temp를 그대로 쓴다.
+const displayTemp = computed(() => toDisplay(props.city.temp))
 </script>
 
 <template>

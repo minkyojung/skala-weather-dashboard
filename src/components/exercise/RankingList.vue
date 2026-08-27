@@ -1,7 +1,6 @@
 <script setup>
 import { computed } from 'vue'
-import { storeToRefs } from 'pinia'
-import { useConfigStore } from '../../stores/configStore.js'
+import { useTemperature } from '../../composables/useTemperature.js'
 
 const props = defineProps({
     title: { type: String, required: true },
@@ -13,18 +12,13 @@ const props = defineProps({
     showNow: { type: Boolean, default: true },
 })
 
-const configStore = useConfigStore()
-const { unitSymbol } = storeToRefs(configStore)
+const { unitSymbol, toDisplay } = useTemperature()
 
 const rows = computed(() =>
-    props.cities.map(city => {
-        const rawTemp = city[props.tempKey]
-        const temp =
-            configStore.unit === 'fahrenheit'
-                ? Math.round((rawTemp * 9) / 5 + 32)
-                : rawTemp
-        return { ...city, shownTemp: temp }
-    }),
+    props.cities.map(city => ({
+        ...city,
+        shownTemp: toDisplay(city[props.tempKey]),
+    })),
 )
 </script>
 

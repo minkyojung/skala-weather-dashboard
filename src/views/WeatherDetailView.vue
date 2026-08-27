@@ -1,9 +1,8 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { storeToRefs } from 'pinia'
 import { fetchWeatherByCityId, fetchForecastByCityId } from '../api/weatherApi.js'
-import { useConfigStore } from '../stores/configStore.js'
+import { useTemperature } from '../composables/useTemperature.js'
 import ForecastList from '../components/exercise/ForecastList.vue'
 
 const route = useRoute()
@@ -12,17 +11,9 @@ const forecast = ref([])
 const isLoading = ref(false)
 const errorMessage = ref('')
 
-const configStore = useConfigStore()
-const { unitSymbol } = storeToRefs(configStore)
+const { unitSymbol, toDisplay } = useTemperature()
 
-const displayTemp = computed(() => {
-    if (!cityInfo.value) return null
-    const rawTemp = cityInfo.value.temp
-    if (configStore.unit === 'fahrenheit') {
-        return Math.round((rawTemp * 9) / 5 + 32)
-    }
-    return rawTemp
-})
+const displayTemp = computed(() => toDisplay(cityInfo.value?.temp))
 
 onMounted(async () => {
     isLoading.value = true

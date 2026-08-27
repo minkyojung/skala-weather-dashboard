@@ -6,13 +6,12 @@ import BaseDashboardCard from '../components/exercise/BaseDashboardCard.vue'
 import SearchBar from '../components/exercise/SearchBar.vue'
 import WeatherCard from '../components/exercise/WeatherCard.vue'
 import { fetchAllWeather } from '../api/weatherApi.js'
-import { useConfigStore } from '../stores/configStore.js'
+import { useTemperature } from '../composables/useTemperature.js'
 import { useFavoriteStore } from '../stores/favoriteStore.js'
 
 const router = useRouter()
 
-const configStore = useConfigStore()
-const { unitSymbol } = storeToRefs(configStore)
+const { unitSymbol, toDisplay } = useTemperature()
 
 const favoriteStore = useFavoriteStore()
 const { favoriteCount } = storeToRefs(favoriteStore)
@@ -46,12 +45,7 @@ const averageTemp = computed(() => {
     return total / weatherList.value.length
 })
 
-const displayAverageTemp = computed(() => {
-    if (configStore.unit === 'fahrenheit') {
-        return Math.round((averageTemp.value * 9) / 5 + 32)
-    }
-    return averageTemp.value.toFixed(1)
-})
+const displayAverageTemp = computed(() => toDisplay(averageTemp.value, 1))
 
 watch(selectedCityInfo, (newCity) => {
     if (newCity) {
