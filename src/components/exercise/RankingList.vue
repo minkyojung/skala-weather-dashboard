@@ -1,6 +1,8 @@
 <script setup>
 import { computed } from 'vue'
-import { useTemperature } from '../../composables/useTemperature.js'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { useTemperature } from '@/composables/useTemperature.js'
 
 const props = defineProps({
     title: { type: String, required: true },
@@ -23,53 +25,28 @@ const rows = computed(() =>
 </script>
 
 <template>
-    <div class="ranking">
-        <h3>{{ title }}</h3>
-        <ol>
-            <li v-for="city in rows" :key="city.name">
-                <span class="name">{{ city.name }}</span>
-                <span v-if="showNow" class="meta">{{ city.status }} · 현지 {{ city.localTime }} {{ city.isDay ? '☀️' : '🌙' }}</span>
-                <span v-else class="meta">{{ city.country }}</span>
-                <span class="temp">{{ city.shownTemp }}{{ unitSymbol }}</span>
-            </li>
-        </ol>
-    </div>
+    <Card>
+        <CardHeader>
+            <CardTitle class="text-base">{{ title }}</CardTitle>
+        </CardHeader>
+        <CardContent class="space-y-1">
+            <div
+                v-for="(city, index) in rows"
+                :key="city.name"
+                class="flex items-center gap-3 border-b py-2 last:border-0"
+            >
+                <span class="w-5 text-sm text-muted-foreground tabular-nums">{{ index + 1 }}</span>
+                <span class="font-medium">{{ city.name }}</span>
+
+                <Badge v-if="showNow" variant="secondary" class="font-normal">
+                    {{ city.status }} · {{ city.localTime }} {{ city.isDay ? '☀️' : '🌙' }}
+                </Badge>
+                <Badge v-else variant="outline" class="font-normal">{{ city.country }}</Badge>
+
+                <span class="ml-auto tabular-nums font-semibold">
+                    {{ city.shownTemp }}{{ unitSymbol }}
+                </span>
+            </div>
+        </CardContent>
+    </Card>
 </template>
-
-<style scoped>
-.ranking {
-    margin-bottom: 20px;
-}
-
-.ranking h3 {
-    font-size: 15px;
-    margin-bottom: 6px;
-}
-
-.ranking ol {
-    margin: 0;
-    padding-left: 20px;
-}
-
-.ranking li {
-    display: flex;
-    align-items: baseline;
-    gap: 8px;
-    padding: 4px 0;
-    border-bottom: 1px solid #eee;
-}
-
-.name {
-    font-weight: 600;
-}
-
-.meta {
-    font-size: 12px;
-    color: #777;
-}
-
-.temp {
-    margin-left: auto;
-    font-variant-numeric: tabular-nums;
-}
-</style>

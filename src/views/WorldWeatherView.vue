@@ -1,7 +1,9 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { fetchWorldWeather } from '../api/worldWeatherApi.js'
-import RankingList from '../components/exercise/RankingList.vue'
+import { fetchWorldWeather } from '@/api/worldWeatherApi.js'
+import RankingList from '@/components/exercise/RankingList.vue'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 const cities = ref([])
 const isLoading = ref(false)
@@ -58,15 +60,22 @@ const dayNightSummary = computed(() => {
 </script>
 
 <template>
-    <div class="world-weather">
-        <h1>지금 지구는</h1>
-        <p class="notice">전 세계가 아니라 <strong>주요 {{ cities.length || 40 }}개 도시</strong> 안에서의 순위입니다.</p>
+    <div class="max-w-2xl space-y-4">
+        <header>
+            <h1 class="text-2xl font-bold tracking-tight">지금 지구는</h1>
+            <p class="mt-1 text-sm text-muted-foreground">
+                전 세계가 아니라 <strong class="font-medium">주요 {{ cities.length || 40 }}개 도시</strong> 안에서의 순위입니다.
+            </p>
+        </header>
 
-        <p v-if="isLoading">세계 날씨를 불러오는 중...</p>
-        <p v-else-if="errorMessage" class="error">{{ errorMessage }}</p>
+        <div v-if="isLoading" class="space-y-3">
+            <Skeleton v-for="n in 3" :key="n" class="h-32 w-full" />
+        </div>
+
+        <p v-else-if="errorMessage" class="text-sm text-destructive">{{ errorMessage }}</p>
 
         <template v-else-if="cities.length">
-            <p v-if="dayNightSummary" class="summary">
+            <p v-if="dayNightSummary" class="rounded-md bg-muted px-3 py-2 text-sm">
                 지금 낮인 도시 {{ dayNightSummary.dayCount }}곳(평균 {{ dayNightSummary.dayAverage }}도) ·
                 밤인 도시 {{ dayNightSummary.nightCount }}곳(평균 {{ dayNightSummary.nightAverage }}도)
             </p>
@@ -74,48 +83,30 @@ const dayNightSummary = computed(() => {
             <RankingList title="🔥 지금 가장 더운 곳" :cities="hottest" />
             <RankingList title="🥶 지금 가장 추운 곳" :cities="coldest" />
 
-            <p class="notice">
-                위 순위는 조회한 순간의 기온이라 <strong>지금 밤인 도시가 유리</strong>합니다.
+            <p class="text-sm text-muted-foreground">
+                위 순위는 조회한 순간의 기온이라 <strong class="font-medium">지금 밤인 도시가 유리</strong>합니다.
                 시각과 무관하게 비교하려면 아래 '오늘 최고기온'을 보세요.
             </p>
             <RankingList title="☀️ 오늘 최고기온" :cities="hottestToday" temp-key="maxTemp" :show-now="false" />
 
-            <div class="base-picker">
-                <label for="base-city">기준 도시</label>
-                <select id="base-city" v-model="baseCityName">
-                    <option v-for="city in cities" :key="city.name" :value="city.name">{{ city.name }}</option>
-                </select>
+            <div class="flex items-center gap-2 pt-2">
+                <span class="text-sm text-muted-foreground">기준 도시</span>
+                <Select v-model="baseCityName">
+                    <SelectTrigger class="w-40">
+                        <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem v-for="city in cities" :key="city.name" :value="city.name">
+                            {{ city.name }}
+                        </SelectItem>
+                    </SelectContent>
+                </Select>
             </div>
             <RankingList :title="`👯 ${baseCityName}와 날씨가 비슷한 곳`" :cities="twins" />
         </template>
 
-        <RouterLink to="/">← 메인 대시보드로 돌아가기</RouterLink>
+        <RouterLink to="/" class="inline-block text-sm underline underline-offset-4">
+            ← 메인 대시보드로 돌아가기
+        </RouterLink>
     </div>
 </template>
-
-<style scoped>
-.world-weather {
-    max-width: 500px;
-}
-
-.notice {
-    font-size: 12px;
-    color: #777;
-}
-
-.summary {
-    font-size: 13px;
-}
-
-.error {
-    color: #c0392b;
-}
-
-.base-picker {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin: 16px 0 8px;
-    font-size: 13px;
-}
-</style>
