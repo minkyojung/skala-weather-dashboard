@@ -3,8 +3,8 @@ import { useConfigStore } from '../stores/configStore.js'
 
 // 원본 데이터는 항상 섭씨다. 화면에 보여줄 때만 현재 단위로 바꾼다.
 //
-// 주의: toDisplay()는 configStore.unit을 읽으므로 computed 안에서 호출해야
-// 단위를 바꿨을 때 다시 계산된다.
+// 주의: toDisplay()는 configStore.unit을 읽으므로 computed나 템플릿 안에서
+// 호출해야 단위를 바꿨을 때 다시 계산된다.
 export function useTemperature() {
     const configStore = useConfigStore()
     const { unitSymbol } = storeToRefs(configStore)

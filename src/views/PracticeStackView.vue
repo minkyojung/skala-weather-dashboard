@@ -1,4 +1,5 @@
 <script setup>
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import VHtmlXss from '../v-html-xss.vue'
 import VText from '../v-text.vue'
 import VHtml from '../v-html.vue'
@@ -65,16 +66,23 @@ const practices = [
 </script>
 
 <template>
-    <div style="max-width: 900px; margin: 0 auto; padding: 20px;">
-        <h1>Vue 실습 스택</h1>
-        <p>생성 순서대로 쌓아서 보여줍니다. (총 {{ practices.length }}개)</p>
-        <div
-            v-for="(practice, index) in practices"
-            :key="practice.title"
-            style="border: 1px solid #ddd; border-radius: 8px; margin-bottom: 24px; padding: 16px;"
-        >
-            <h2 style="margin-top: 0; font-size: 16px; color: #666;">{{ index + 1 }}. {{ practice.title }}</h2>
-            <component :is="practice.component" />
-        </div>
+    <div class="max-w-3xl space-y-4">
+        <header>
+            <h1 class="text-2xl font-bold tracking-tight">Hands On</h1>
+            <p class="mt-1 text-sm text-muted-foreground">
+                수업 중 수행한 실습을 순서대로 보여줍니다. (총 {{ practices.length }}개)
+            </p>
+        </header>
+
+        <Card v-for="(practice, index) in practices" :key="practice.title">
+            <CardHeader>
+                <CardTitle class="text-base text-muted-foreground">
+                    {{ index + 1 }}. {{ practice.title }}
+                </CardTitle>
+            </CardHeader>
+            <CardContent>
+                <component :is="practice.component" />
+            </CardContent>
+        </Card>
     </div>
 </template>
